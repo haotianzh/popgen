@@ -23,6 +23,14 @@ class Node(object):
         self.children = OrderedDict()
         self._children = []  # using for printing tree
 
+    def __eq__(self, node):
+        if node.identifier == self.identifier:
+            return True
+        return False
+        
+    def __hash__(self):
+        return hash(self.identifier)
+
     @property
     def identifier(self):
         return self._identifier
@@ -43,7 +51,7 @@ class Node(object):
             raise Exception('node has no parent, branch cannot be assigned.')
         try:
             self._branch = float(value)
-        except ValueError:
+        except (ValueError, TypeError):
             # branch may not be a number, now we can assign any object attaching on the branch
             # to be efficiently used on phylogeny and mutation tree
             self._branch = value 

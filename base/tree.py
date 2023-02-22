@@ -11,9 +11,10 @@ class BaseTree(object):
     # >>> tree = BaseTree();
     # >>> tree = popgen.utils.treeutils.from_newick('((1,2),(3,4));') # or
     """
-    def __init__(self):
-        self.root = None
-        self._nodes = OrderedDict()
+    def __init__(self, root=None):
+        self.root = root
+        self._update()
+
 
     def __contains__(self, node):
         # if a node is in this tree
@@ -31,6 +32,19 @@ class BaseTree(object):
     def __len__(self):
         # obtain number of nodes in a tree
         return len(self._nodes)
+    
+    def __eq__(self, tree):
+        return tree.get_splits(True) == self.get_splits(True)
+
+    def __hash__(self):
+        return hash(self.get_splits(True))
+
+
+    def _update(self):
+        if self.root is not None:
+            self._nodes = self.root.get_descendants_dict()
+            self._nodes[self.root.identifier] = self.root
+
 
     def create_node(self, identifier=None, name=None, parent=None) -> Node:
         node = Node(identifier=identifier, name=name)
@@ -60,21 +74,21 @@ class BaseTree(object):
     def get_all_nodes(self):
         return self._nodes
 
-    def get_leaves(self):
+    def get_leaves(self, return_label=False):
         # leaves = []
         # for nid in self.get_all_nodes():
         #     if self[nid].is_leaf():
         #         leaves.append(nid)
         # return leaves
-        leaves = [node.identifier for node in self.root.get_leaves()]
+        leaves = [node.name if return_label else node.identifier for node in self.root.get_leaves()]
         return leaves
 
-    def get_splits(self):
+    def get_splits(self, return_label=False):
         splits = set()
         for nid in self.get_all_nodes():
             if not self._nodes[nid].is_leaf() and not self._nodes[nid].is_root():
-                splits.add(frozenset([node.identifier for node in self._nodes[nid].get_leaves()]))
-        return splits
+                splits.add(frozenset([node.name if return_label else node.identifier for node in self._nodes[nid].get_leaves()]))
+        return frozenset(splits)
 
     def to_dict(self):
         # return a dict for the whole tree.
