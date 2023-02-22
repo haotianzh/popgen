@@ -103,7 +103,7 @@ def from_newick(newick: str) -> BaseTree:
             nid, br = newick[i:j].split(':')
         else:
             nid = newick[i:j]
-        return nid.strip(), float(br), j
+        return nid.strip(), br, j
 
     newick = newick.strip()
     assert isinstance(newick, str), Exception('newick should be a string.')
@@ -114,11 +114,11 @@ def from_newick(newick: str) -> BaseTree:
         if newick[i] in [',', ' ']:
             i += 1
             continue
-        if newick[i] is '(':
+        if newick[i] == '(':
             level += 1
             i += 1
             continue
-        if newick[i] is ')':
+        if newick[i] == ')':
             if not nodes:
                 raise Exception('newick: bad parsing.')
             identifier, branch, end = _next(i + 1)

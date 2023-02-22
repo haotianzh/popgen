@@ -12,7 +12,7 @@ class Node(object):
     >>> node = Node(1) # or
     >>> node = Node(identifier=1, name='ken', branch=10) # or
     """
-    def __init__(self, identifier=None, name=None, branch=0):
+    def __init__(self, identifier=None, name=None, branch=None):
         self.identifier = identifier
         if name is None:
             self.name = str(self.identifier)
@@ -29,7 +29,7 @@ class Node(object):
 
     @identifier.setter
     def identifier(self, nid):
-        if nid is None or nid is '':
+        if nid is None or nid == '':
             nid = str(binascii.hexlify(os.urandom(5)).decode('utf-8'))
         self._identifier = nid
 
@@ -41,10 +41,12 @@ class Node(object):
     def branch(self, value):
         if self.parent is None:
             raise Exception('node has no parent, branch cannot be assigned.')
-        if isinstance(value, float) or isinstance(value, int):
-            self._branch = value
-        else:
-            raise Exception('branch must be a number.')
+        try:
+            self._branch = float(value)
+        except ValueError:
+            # branch may not be a number, now we can assign any object attaching on the branch
+            # to be efficiently used on phylogeny and mutation tree
+            self._branch = value 
 
     def is_root(self):
         return self.get_level() == 0
