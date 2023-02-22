@@ -75,11 +75,6 @@ class BaseTree(object):
         return self._nodes
 
     def get_leaves(self, return_label=False):
-        # leaves = []
-        # for nid in self.get_all_nodes():
-        #     if self[nid].is_leaf():
-        #         leaves.append(nid)
-        # return leaves
         leaves = [node.name if return_label else node.identifier for node in self.root.get_leaves()]
         return leaves
 

@@ -160,6 +160,7 @@ def perturb_tree_length(tree, min=.5, max=1.5):
 # only be using when labels are integers
 # name_map should be a dictionary which has form like {'old_name': 'new_name'}
 def relabel(tree, offset=0, name_map=None):
+    tree = tree.copy()
     try:
         if offset != 0 and name_map:
             raise Exception('error, both offset and name_map are specified')
@@ -173,6 +174,7 @@ def relabel(tree, offset=0, name_map=None):
                     tree[leaf].name = name_map[name]
     except Exception as e:
         print(e)
+    return tree
 
 
 """
@@ -181,6 +183,7 @@ def relabel(tree, offset=0, name_map=None):
     Date: 12/27/22
 """
 class BNode(Node):
+    # extended Node class for recording mutations 
     def __init__(self, identifier=None, name=None, branch=0):
         super().__init__(identifier, name, branch)
         self.mutations = []
