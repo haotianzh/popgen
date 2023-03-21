@@ -143,14 +143,18 @@ def from_newick(newick: str) -> BaseTree:
 
 
 # perturb the branch lengths for data without clock property
-def perturb_tree_length(tree, min=.5, max=1.5):
+def perturb_tree_length(tree, min=.5, max=1.5, mode='mul'):
     tree = tree.copy()
     for node_str in tree.get_all_nodes():
         node = tree[node_str]
         if not node.is_root():
-            rand = np.random.uniform(min, max)
             try:
-                node.branch = np.round(node.branch * rand, 4)
+                if mode == 'mul':
+                    rand = np.random.uniform(min, max)
+                    node.branch = np.round(node.branch * rand, 4)
+                if mode == 'add':
+                    rand = np.random.rand()
+                    node.branch = np.round(node.branch + rand, 4)
             except ValueError:
                 raise Exception('branch is not a valid number')
     return tree
@@ -158,7 +162,7 @@ def perturb_tree_length(tree, min=.5, max=1.5):
 
 # relabel the leaves, this is usually used when there are different start indices
 # only be using when labels are integers
-# name_map should be a dictionary which has form like {'old_name': 'new_name'}
+# name_map should be a dictionary which is formatted as {'old_name': 'new_name'}
 def relabel(tree, offset=0, name_map=None):
     tree = tree.copy()
     try:
