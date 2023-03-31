@@ -42,7 +42,15 @@ def rf_dist(newicks, num_thread=10):
         Return: pairwise RF distance among those trees
     """
     dist = RFDistance.rfDistance(newicks, num_thread)
-    return dist
+    return np.array(dist)
+
+
+def rf_dist_window(newicks, window_size=50, which='fast', num_thread=10):
+    """
+        RFDistance.java -> (public static double[][][] rfDistanceWindow(String[][] newicks, int windowSize, int cpuCount, String which))
+    """
+    dist = RFDistance.rfDistanceWindow(newicks, window_size, num_thread, which)
+    return np.array(dist)
 
 
 def triplet_dist(newicks, num_thread=10):
@@ -53,4 +61,4 @@ def triplet_dist(newicks, num_thread=10):
         Return: pairwise triplet distance among those trees
     """
     dist = TripletDistance.tripletDistance(newicks, num_thread)
-    return dist
+    return np.array(dist)

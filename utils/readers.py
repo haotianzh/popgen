@@ -375,7 +375,7 @@ def sample_recombination_map_from_hapmap(file, length=1e5, seed=123):
     end = start + 1 
     while rate_map_file.iloc[end, 0] - positions[0] < length:
         positions.append(rate_map_file.iloc[end, 0])
-        rates.append(rate_map_file.iloc[end, 1])
+        rates.append(rate_map_file.iloc[end, 1]*1e-8)
         end += 1
     positions.append(rate_map_file.iloc[end, 0])
     positions = [int(pos-positions[0]) for pos in positions]
