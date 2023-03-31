@@ -208,7 +208,7 @@ def _parse_vcf_metadata(st):
     pre_symbol = ''
     for i, ch in enumerate(st):
         if ch == '=' or ch == ',' or ch == '>':
-            if pre_symbol is not '>':
+            if pre_symbol != '>':
                 entities.append(entity)
                 entity = ''
         elif ch == '<':
@@ -217,18 +217,18 @@ def _parse_vcf_metadata(st):
             entity += ch
             if i == len(st)-1:
                 entities.append(entity)
-        if ch is ',' or ch is '>':
+        if ch == ',' or ch == '>':
             value = entities.pop()
             key = entities.pop()
             entities.append({key:value})
-        if ch is '>':
+        if ch == '>':
             values = {}
             value = entities.pop()
-            while value is not '<':
+            while value != '<':
                 values.update(value)
                 value = entities.pop()
             entities.append(values)
-        if ch is not ' ':
+        if ch != ' ':
             pre_symbol = ch
     return {entities[0]: entities[1]}
 
@@ -352,3 +352,35 @@ def load_recombination_map_from_file(file, background_rate=1e-10):
                 rates.append(rate)
     map = msp.RateMap(position=positions, rate=rates)
     return map
+
+
+
+def sample_recombination_map_from_hapmap(file, length=1e5, seed=123):
+    """
+        sample a map from a Hapmap recombination map file with a given length.
+        Input: 
+            file: hapmap recombination file path (ex. ./RecombMap/genetic_map_chr1_b36.txt)
+            length: length of the sampling map
+        Return: a msprime RateMap
+    """
+    check_file_existence(file)
+    # np.random.seed(seed=seed)
+    rate_map_file = pd.read_csv(file, sep='\s+')
+    num_allele = rate_map_file.shape[0]
+    range = 5000
+    index_mid = num_allele // 2
+    start = np.random.randint(index_mid-range, index_mid+range)
+    positions = [rate_map_file.iloc[start, 0]]
+    rates = [rate_map_file.iloc[start, 1]*1e-8]
+    end = start + 1 
+    while rate_map_file.iloc[end, 0] - positions[0] < length:
+        positions.append(rate_map_file.iloc[end, 0])
+        rates.append(rate_map_file.iloc[end, 1])
+        end += 1
+    positions.append(rate_map_file.iloc[end, 0])
+    positions = [int(pos-positions[0]) for pos in positions]
+    map = msp.RateMap(position=positions, rate=rates)
+    return map
+
+
+
