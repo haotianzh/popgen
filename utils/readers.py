@@ -377,8 +377,9 @@ def sample_recombination_map_from_hapmap(file, length=1e5, seed=123):
         positions.append(rate_map_file.iloc[end, 0])
         rates.append(rate_map_file.iloc[end, 1])
         end += 1
-    positions.append(length)
+    positions.append(rate_map_file.iloc[end, 0])
     positions = [int(pos-positions[0]) for pos in positions]
+    positions[-1] = length
     map = msp.RateMap(position=positions, rate=rates)
     return map
 
