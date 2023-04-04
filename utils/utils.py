@@ -278,7 +278,7 @@ def write_vcf(trees, name):
         write to .vcf using tskit.write_vcf
     '''
     out = open(name, 'w')
-    trees.write_vcf(out, ploidy=2)
+    trees.write_vcf(out)
     out.close()
 
 
