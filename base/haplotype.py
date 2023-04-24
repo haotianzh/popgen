@@ -17,7 +17,7 @@ class Haplotype(object):
             self.positions = positions
         self.ancestral_state = ancestral_state
         length = self.positions[-1] - self.positions[0]
-        self.scaled_positions = ((np.array(self.positions) - self.positions[0]) / length * 10000 + 1)
+        # self.scaled_positions = ((np.array(self.positions) - self.positions[0]) / length * 10000 + 1)
 
     def cut(self):
         # using tskit.TreeSequence.keep_intervals() to cut genome into fixed-length fragments.
@@ -37,9 +37,11 @@ class Haplotype(object):
         else:
             return 0
 
-    def converse(self):
+    def set_ancestral_state(self, state):
         # converts ancestral state from 0 to 1.
-        pass
+        if state != self.ancestral_state:
+            self.matrix = 1 - self.matrix
+
 
     def from_tskit(self, ts):
         # converts from tskit format.

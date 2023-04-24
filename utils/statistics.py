@@ -5,6 +5,50 @@ import scipy
 from scipy import stats
 
 
+DEFAULT_WINDOW_SIZE = 50
+DEFAULT_SAMPLE_SIZE = 50
+
+
+def get_configuration_number(haplotype, window_size=DEFAULT_WINDOW_SIZE):
+    genotype_matrix = haplotype.matrix
+    nhap, nsite = genotype_matrix.shape
+    result = []
+    combos = [[0,0], [0,1], [1,0], [1,1]]
+    for site in range(nsite):
+        vecs = []
+        for i in range(site-window_size, site+window_size+1):
+            if i < 0 or i >= nsite:
+                vecs += [0,0,0,0]
+                continue
+            two_cols = genotype_matrix[:, (site, i)]
+            for combo in combos:
+                vecs.append((two_cols==combo).all(axis=1).sum())
+        result.append(vecs)
+    return np.array(result)
+
+
+def linkage_disequilibrium_window(haplotype, window_size=DEFAULT_WINDOW_SIZE):
+    """
+        LDs between a specific SNP and each of its neighbor SNPs in a given length. 
+    """
+    genotype_matrix = haplotype.matrix
+    nhap, nsite = genotype_matrix.shape
+    result = []
+    af = genotype_matrix.sum(axis=0) / nhap
+    for site in range(nsite):
+        vecs = []
+        for i in range(site-window_size, site+window_size+1):
+            if i < 0 or i >= nsite:
+                vecs.append(0.0) # missing alleles are regarded as linkage equilibirum, or may be improved by using values other than 0.
+                continue
+            two_cols = genotype_matrix[:, (site, i)]
+            x00 = (two_cols==[0,0]).all(axis=1).sum() / nhap
+            r2 = (x00-(1-af[site])*(1-af[i]))**2 / (af[site]*af[i]*(1-af[site])*(1-af[i]))
+            vecs.append(r2)
+        result.append(vecs)
+    return np.array(result)
+
+
 def linkage_disequilibrium(haplotypes):
     assert isinstance(haplotypes, list)
     lds = [pairwise_ld(hap) for hap in haplotypes]
@@ -50,7 +94,7 @@ def cluster_ld(matrix):
         j = rows
         while j > i:
             temp = matrix[i:j, i:j]
-            if np.sum(temp) / ((j - i) ** 2) > 0.1:  # threshold is 0.1 (can change here)
+            if np.sum(temp) / ((j - i) ** 2) > 0.1:  # threshold is 0.1 (may change here)
                 mat[i:j, i:j] = 1
                 i = j - 1
                 break
@@ -59,7 +103,7 @@ def cluster_ld(matrix):
     return mat
 
 
-def stat(rates, pos, sequence_length, ne=1e5, window_size=50, step_size=50, bin_width=1e4, ploidy=1):
+def stat(rates, pos, sequence_length, ne=1e5, window_size=DEFAULT_WINDOW_SIZE, step_size=DEFAULT_WINDOW_SIZE, bin_width=1e4, ploidy=1):
     """
         Formatting window-based scaled estimation to per-base recombination rates.
         Input: deeprho estimates, SNPs positions, sequence length, effective population size, window size, step size, statistical resolution, ploidy

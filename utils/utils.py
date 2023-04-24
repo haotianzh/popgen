@@ -5,6 +5,7 @@ import tskit
 import pickle
 import numpy as np
 import multiprocessing as mp
+from datetime import datetime
 
 
 # for class Haplotype
@@ -90,6 +91,18 @@ def get_num_bkpts(configs, samples=50, repeats=50):
     for rep in simulator(samples, repeats):
         points.append(rep.ts.num_trees + 1)
     return np.mean(points)
+
+
+def get_recombination_rate_map(replicate):
+    """
+        Get a recombination rate map at each SNP.
+    """
+    rate = replicate.configs['recombination_rate']
+    if isinstance(rate, float):
+        rate_map = np.ones(replicate.haplotype.nsites) * rate
+    else:
+        rate_map = [rate.get(pos) for pos in replicate.haplotype.positions]
+    return np.array(rate_map, np.float32)
 
 
 SEQUENCE_LENGTH = 2e3
@@ -312,3 +325,19 @@ def write_ms(trees, name):
         out.write(''.join([str(val) for val in row]))
         out.write('\n')
     out.close()
+
+
+def load_pickle_file(file):
+    with open(file, 'rb') as f:
+        f = pickle.load(f)
+    return f
+
+
+def save(obj, path):
+        with open(path, 'wb') as out:
+            pickle.dump(obj, out, protocol=4)
+
+
+def get_datetime():
+    now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
+    return f'[{now}]'
