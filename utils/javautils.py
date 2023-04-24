@@ -7,6 +7,15 @@ from labwu.rentplus.main import MPRentPlus
 from labwu.py import RFDistance
 from labwu.py import TripletDistance
 
+
+def to_ragged(array): # return a regular array or a ragged array automatically 
+    len0 = len(array)
+    len1 = len(array[0])
+    if len0 != len1:  
+        return [np.array(a) for a in array]
+    return np.array(array)
+
+
 def rentplus(haps, num_thread=1, infer_branch=False):
     """
         API for inferring local genealogies from haplotypes. The original software was developed by Sajad Mirzaei (
@@ -42,7 +51,7 @@ def rf_dist(newicks, num_thread=10):
         Return: pairwise RF distance among those trees
     """
     dist = RFDistance.rfDistance(newicks, num_thread)
-    return np.array(dist)
+    return to_ragged(dist)
 
 
 def rf_dist_window(newicks, window_size=50, which='fast', num_thread=10):
@@ -50,7 +59,7 @@ def rf_dist_window(newicks, window_size=50, which='fast', num_thread=10):
         RFDistance.java -> (public static double[][][] rfDistanceWindow(String[][] newicks, int windowSize, int cpuCount, String which))
     """
     dist = RFDistance.rfDistanceWindow(newicks, window_size, num_thread, which)
-    return np.array(dist)
+    return to_ragged(dist)
 
 
 def triplet_dist(newicks, num_thread=10):
@@ -61,4 +70,4 @@ def triplet_dist(newicks, num_thread=10):
         Return: pairwise triplet distance among those trees
     """
     dist = TripletDistance.tripletDistance(newicks, num_thread)
-    return np.array(dist)
+    return to_ragged(dist)
