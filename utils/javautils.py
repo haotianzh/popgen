@@ -71,3 +71,8 @@ def triplet_dist(newicks, num_thread=10):
     """
     dist = TripletDistance.tripletDistance(newicks, num_thread)
     return to_ragged(dist)
+
+
+def triplet_dist_window(newicks, window_size=50, num_thread=10):
+    dist = TripletDistance.tripletDistsWindow(newicks, window_size, num_thread)
+    return to_ragged(dist)
