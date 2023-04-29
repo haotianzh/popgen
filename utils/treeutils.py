@@ -165,19 +165,21 @@ def perturb_tree_length(tree, min=.5, max=1.5, mode='mul'):
 # name_map should be a dictionary which is formatted as {'old_name': 'new_name'}
 def relabel(tree, offset=0, name_map=None):
     tree = tree.copy()
-    try:
-        if offset != 0 and name_map:
-            raise Exception('error, both offset and name_map are specified')
-        elif offset != 0:
-            for leaf in tree.get_leaves():
-                tree[leaf].name = str(int(tree[leaf].name)+offset)
-        else:
-            for leaf in tree.get_leaves():
-                name = tree[leaf].name
-                if name in name_map:
-                    tree[leaf].name = name_map[name]
-    except Exception as e:
-        print(e)
+    print('test')
+    # try:
+    if offset != 0 and name_map:
+        raise Exception('error, both offset and name_map are specified')
+    elif offset != 0:
+        for leaf in tree.get_leaves():
+            tree[leaf].name = str(int(tree[leaf].name)+offset)
+    else:
+        for leaf in tree.get_leaves():
+            name = tree[leaf].name
+            if name in name_map:
+                tree[leaf].name = name_map[name]
+    # except Exception as e:
+    #     print(e)
+    #     exit()
     return tree
 
 
