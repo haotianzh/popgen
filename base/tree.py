@@ -2,6 +2,14 @@ from collections import OrderedDict, defaultdict
 from .node import Node
 import pptree
 import copy
+import _pickle as cPickle
+
+
+def deepcopy(obj):
+    try:
+        return cPickle.loads(cPickle.dumps(obj, -1))
+    except Exception:
+        return copy.deepcopy(obj)
 
 class BaseTree(object):
     """
@@ -101,7 +109,6 @@ class BaseTree(object):
 
         def newick():
             return _newick(self.root, branch_lengths) + ';'
-
         funcs = {'newick': newick}
         return funcs[output_format]()
 
@@ -109,4 +116,4 @@ class BaseTree(object):
         pptree.print_tree(self.root, "_children", horizontal=False)
 
     def copy(self):
-        return copy.deepcopy(self)
+        return deepcopy(self)

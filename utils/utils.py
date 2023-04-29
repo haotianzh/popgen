@@ -1,8 +1,8 @@
+import pickle
 from ..base import Haplotype, Replicate
 from . import *
 import os
 import tskit
-import pickle
 import numpy as np
 import multiprocessing as mp
 from datetime import datetime
@@ -341,3 +341,4 @@ def save(obj, path):
 def get_datetime():
     now = datetime.now().strftime("%m/%d/%Y %H:%M:%S")
     return f'[{now}]'
+
