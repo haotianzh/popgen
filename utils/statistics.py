@@ -39,7 +39,7 @@ def linkage_disequilibrium_window(haplotype, window_size=DEFAULT_WINDOW_SIZE):
         vecs = []
         for i in range(site-window_size, site+window_size+1):
             if i < 0 or i >= nsite:
-                vecs.append(0.0) # missing alleles are regarded as linkage equilibirum, or may be improved by using values other than 0.
+                vecs.append(0.0) # missing alleles are suppose to be linkage equilibirum, or may be improved by using values other than 0.
                 continue
             two_cols = genotype_matrix[:, (site, i)]
             x00 = (two_cols==[0,0]).all(axis=1).sum() / nhap
@@ -47,6 +47,86 @@ def linkage_disequilibrium_window(haplotype, window_size=DEFAULT_WINDOW_SIZE):
             vecs.append(r2)
         result.append(vecs)
     return np.array(result)
+
+
+def map_to_nearby_snp(positions, index, window_size, step_size):
+    nsites = len(positions)
+    half_window = window_size // 2
+    focal_loc = positions[index]
+    cursor = focal_loc
+    i = index
+    res = {}
+    while abs(cursor-focal_loc) <= half_window:
+        while i > 0 and cursor <= positions[i-1]:
+            i -= 1
+        if i <= 0:
+            res[cursor] = positions[0]
+        else:
+            if abs(positions[i]-cursor) <= abs(positions[i-1]-cursor):
+                res[cursor] = positions[i]
+            else:
+                res[cursor] = positions[i-1]
+        cursor -= step_size
+    
+    cursor = focal_loc
+    i = index
+    while abs(cursor-focal_loc) <= half_window:
+        while i < nsites-1 and cursor >= positions[i+1]:
+            i += 1
+        if i >= nsites-1:
+            res[cursor] = positions[-1]
+        else:
+            if abs(positions[i]-cursor) <= abs(positions[i+1]-cursor):
+                res[cursor] = positions[i]
+            else:
+                res[cursor] = positions[i+1]
+        cursor += step_size
+    return res
+    
+
+def linkage_disequilibrium_bp_window(haplotype, window_size, step_size):
+    """
+        LDs between a specific SNP and each of its neighbor SNPs within a given physical length.
+    """
+    nsites = haplotype.nsites
+    genotype_matrix = haplotype.matrix
+    positions = haplotype.positions
+    nhap, nsite = genotype_matrix.shape
+    half_window = window_size // 2
+    af = genotype_matrix.sum(axis=0) / nhap
+    results = []
+    for site in range(nsite):
+        rmap = {}
+        step = 0
+        vec = []
+        while site-step>=0 and abs(positions[site-step]-positions[site]) <= half_window:
+            two_cols = genotype_matrix[:, (site, site-step)]
+            x00 = (two_cols==[0,0]).all(axis=1).sum() / nhap
+            r2 = (x00-(1-af[site])*(1-af[site-step]))**2 / (af[site]*af[site-step]*(1-af[site])*(1-af[site-step]))
+            rmap[positions[site-step]] = r2
+            step += 1
+        if site-step>=0:
+            two_cols = genotype_matrix[:, (site, site-step)]
+            x00 = (two_cols==[0,0]).all(axis=1).sum() / nhap
+            r2 = (x00-(1-af[site])*(1-af[site-step]))**2 / (af[site]*af[site-step]*(1-af[site])*(1-af[site-step]))
+            rmap[positions[site-step]] = r2
+        step = 0
+        while site+step<nsites and abs(positions[site+step]-positions[site]) <= half_window:
+            two_cols = genotype_matrix[:, (site, site+step)]
+            x00 = (two_cols==[0,0]).all(axis=1).sum() / nhap
+            r2 = (x00-(1-af[site])*(1-af[site+step]))**2 / (af[site]*af[site+step]*(1-af[site])*(1-af[site+step]))
+            rmap[positions[site+step]] = r2
+            step += 1
+        if site+step<nsites:
+            two_cols = genotype_matrix[:, (site, site+step)]
+            x00 = (two_cols==[0,0]).all(axis=1).sum() / nhap
+            r2 = (x00-(1-af[site])*(1-af[site+step]))**2 / (af[site]*af[site+step]*(1-af[site])*(1-af[site+step]))
+            rmap[positions[site+step]] = r2
+        neaby_map = map_to_nearby_snp(positions=positions, index=site, window_size=window_size, step_size=step_size)
+        for loc in sorted(neaby_map.values()):
+            vec.append(rmap[loc])
+        results.append(vec)
+    return np.array(results)
 
 
 def linkage_disequilibrium(haplotypes):

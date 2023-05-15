@@ -62,6 +62,14 @@ def rf_dist_window(newicks, window_size=50, which='fast', num_thread=10):
     return to_ragged(dist)
 
 
+def rf_dist_bp_window(newicks, positions, window_size=1000, step_size=10, num_thread=10):
+    """
+        RFDistance.java -> public static double[][][] rfDistanceBPWindow(String[][] newicks, int[][] positions, int windowSize, int stepSize, int cpuCount)
+    """
+    dist = RFDistance.rfDistanceBPWindow(newicks, positions, window_size, step_size, num_thread)
+    return to_ragged(dist)
+
+
 def triplet_dist(newicks, num_thread=10):
     """
         API for calculating triplet distance.
