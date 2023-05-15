@@ -66,7 +66,10 @@ class Simulator(object):
         replicates = msp.sim_ancestry(samples=nsam, num_replicates=nreps, **self._ancestry_configs)
         # simulate mutations once for each of genealogical trees.
         for ts in replicates:
-            configs = {'rate': self._mutation_configs['rate']()}
+            if isinstance(self._mutation_configs['rate'], ExpLogGenerator):
+                configs = {'rate': self._mutation_configs['rate']()}
+            else:
+                configs = {'rate': self._mutation_configs['rate']}
             mts = msp.sim_mutations(ts, model=msp.InfiniteSites(), **configs)
             configs.update(self._ancestry_configs)
             mts.__setattr__('rr', configs['recombination_rate'])
@@ -90,12 +93,14 @@ class Simulator(object):
             if key not in configs:
                 raise Exception("%s must be set." % key)
         if 'rate' in configs:
-            assert isinstance(configs['rate'], float) or isinstance(configs['rate'], list) or isinstance(configs['rate'], ExpLogGenerator), \
+            assert isinstance(configs['rate'], float) or isinstance(configs['rate'], list) or isinstance(configs['rate'], ExpLogGenerator) or isinstance(configs['rate'], msp.RateMap),\
                 Exception("mutation rate should be either a float number or an interval.")
             if isinstance(configs['rate'], ExpLogGenerator):
                 pass
             elif isinstance(configs['rate'], float):
                 self._mutation_configs = {'rate': ExpLogGenerator(configs['rate'], configs['rate'])}
+            elif isinstance(configs['rate'], msp.RateMap):
+                self._mutation_configs = {'rate': configs['rate']}
             else:
                 assert len(configs['rate']) == 2, Exception("length of list must be exactly 2.")
                 self._mutation_configs = {'rate': ExpLogGenerator(configs['rate'][0], configs['rate'][1])}
