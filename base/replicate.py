@@ -18,7 +18,7 @@ class Replicate(object):
         trees = []
         for variant in self.ts.variants():
             pos = variant.position
-            trees.append(self.ts.at(pos))
+            trees.append(self.ts.at(pos).newick(include_branch_lengths=branch_length))
 
         # breakpoints = list(self.ts.breakpoints())
         # for i, tree in enumerate(self.ts.aslist()):
