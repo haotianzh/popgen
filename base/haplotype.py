@@ -16,7 +16,7 @@ class Haplotype(object):
             self.matrix = matrix
             self.positions = positions
         self.ancestral_state = ancestral_state
-        length = self.positions[-1] - self.positions[0]
+        # length = self.positions[-1] - self.positions[0]
         # self.scaled_positions = ((np.array(self.positions) - self.positions[0]) / length * 10000 + 1)
 
     def cut(self):
