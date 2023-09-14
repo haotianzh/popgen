@@ -327,3 +327,56 @@ def build_perfect_phylogeny(mat):
             child.add_mutations(node.mutations)
     phylogeny = from_node(root)
     return phylogeny
+
+
+def spr_move(tree):
+    # a spr move is to randomly select a node and swap its parent with another node
+    # the parent node should not be the root and the other node cannot be its descendant
+    # return a new tree
+    tree = tree.copy()
+    nodes = list(tree.get_all_nodes())
+    while True:
+        node = tree[np.random.choice(nodes)]
+        if node.is_root():
+            continue
+        parent = node.parent
+        if parent.is_root():
+            continue
+        # get all nodes that are not descendants of node
+        candidates = []
+        for n in nodes:
+            if n not in node.get_descendants() and n != node:
+                candidates.append(n)
+        if not candidates:
+            continue
+        new_parent = tree[np.random.choice(candidates)]
+        if new_parent.is_root():
+            continue
+        # swap
+        node.parent = new_parent
+        new_parent.add_child(node)
+        parent.children.pop(node.identifier)
+        parent._children.remove(node)
+        break
+    return tree
+
+
+def get_random_tree(n_leave, start_index=0):
+    # create a random binary tree given the number of leaves
+    nodes = [BNode(identifier=i) for i in range(start_index, n_leave+start_index)]
+    while len(nodes) > 1:
+        i = np.random.randint(0, len(nodes))
+        j = np.random.randint(0, len(nodes))
+        while j == i:
+            j = np.random.randint(0, len(nodes))
+        node = BNode()
+        node.add_child(nodes[i])
+        node.add_child(nodes[j])
+        nodes[i].set_parent(node)
+        nodes[j].set_parent(node)
+        nodes.pop(max(i,j))
+        nodes.pop(min(i,j))
+        nodes.append(node)
+    root = nodes.pop()
+    tree = from_node(root)
+    return tree

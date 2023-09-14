@@ -112,7 +112,7 @@ class BaseTree(object):
         funcs = {'newick': newick}
         return funcs[output_format]()
 
-    def print(self):
+    def draw(self):
         pptree.print_tree(self.root, "_children", horizontal=False)
 
     def copy(self):
