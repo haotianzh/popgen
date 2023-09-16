@@ -104,6 +104,12 @@ class Node(object):
         self.children[node.identifier] = node
         self._children.append(node)
 
+    def remove_child(self, node):
+        if node.identifier not in self.children:
+            raise Exception('node %s is not a child of %s.' % (node.identifier, self.identifier))
+        del self.children[node.identifier]
+        self._children.remove(node) 
+
     def get_children(self):
         return self._children
 

@@ -1,6 +1,7 @@
 from ..base import BaseTree, Node
 import warnings
 import time
+import random
 import numpy as np
 
 """
@@ -329,39 +330,71 @@ def build_perfect_phylogeny(mat):
     return phylogeny
 
 
-def spr_move(tree):
-    # a spr move is to randomly select a node and swap its parent with another node
-    # the parent node should not be the root and the other node cannot be its descendant
-    # return a new tree
+def single_spr_move(tree):
+    """
+        Note: only for binary tree
+        a spr move is to randomly select a node and swap its parent with another node
+        the parent node should not be the root and the other node cannot be its descendant
+        return a new tree
+    """
     tree = tree.copy()
-    nodes = list(tree.get_all_nodes())
+    nodes = list(tree.get_all_nodes()) # identifiers
+    
     while True:
-        node = tree[np.random.choice(nodes)]
+        node = tree[random.choice(nodes)]
+        parent = node.parent
         if node.is_root():
             continue
-        parent = node.parent
         if parent.is_root():
             continue
         # get all nodes that are not descendants of node
         candidates = []
-        for n in nodes:
+        for idx in nodes:
+            n = tree[idx]
             if n not in node.get_descendants() and n != node:
                 candidates.append(n)
         if not candidates:
             continue
-        new_parent = tree[np.random.choice(candidates)]
-        if new_parent.is_root():
+                
+        new_sibling = random.choice(candidates)
+        if new_sibling.is_root():
+            continue
+        if new_sibling == parent:
             continue
         # swap
-        node.parent = new_parent
-        new_parent.add_child(node)
-        parent.children.pop(node.identifier)
-        parent._children.remove(node)
+        # print('node', node.identifier)
+        # print('sib', new_sibling.identifier)  
+        grandparent = parent.parent
+        parent.remove_child(node)
+        node.set_parent(None)
+        sibling = parent.get_children()[0]
+        grandparent.remove_child(parent)
+        parent.set_parent(None)
+        parent.remove_child(sibling)
+        grandparent.add_child(sibling)
+        sibling.set_parent(grandparent)
+        sibling_parent = new_sibling.parent
+        sibling_parent.remove_child(new_sibling)
+        new_sibling.set_parent(None)
+        parent.add_child(new_sibling)
+        parent.add_child(node)
+        node.set_parent(parent)
+        new_sibling.set_parent(parent)
+        sibling_parent.add_child(parent)
+        parent.set_parent(sibling_parent)
         break
+
+    tree._update()
     return tree
 
 
-def get_random_tree(n_leave, start_index=0):
+def spr_move(tree, move):
+    for _ in range(move):
+        tree = single_spr_move(tree)
+    return tree
+
+
+def get_random_binary_tree(n_leave, start_index=0):
     # create a random binary tree given the number of leaves
     nodes = [BNode(identifier=i) for i in range(start_index, n_leave+start_index)]
     while len(nodes) > 1:
@@ -369,7 +402,7 @@ def get_random_tree(n_leave, start_index=0):
         j = np.random.randint(0, len(nodes))
         while j == i:
             j = np.random.randint(0, len(nodes))
-        node = BNode()
+        node = Node()
         node.add_child(nodes[i])
         node.add_child(nodes[j])
         nodes[i].set_parent(node)
