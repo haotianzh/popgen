@@ -89,7 +89,7 @@ class BaseTree(object):
     def get_splits(self, return_label=False, contains_leaf=None):
         def get_complement_split(split):
             return frozenset(filter(lambda x: x not in split, leaves))
-        leaves = self.get_leaves()
+        leaves = self.get_leaves(return_label=True)
         splits = set()
         for nid in self.get_all_nodes():
             # if it is root or a leaf which means trivial split, pass
