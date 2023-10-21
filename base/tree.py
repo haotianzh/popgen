@@ -86,7 +86,7 @@ class BaseTree(object):
         leaves = [node.name if return_label else node.identifier for node in self.root.get_leaves()]
         return leaves
 
-    def get_splits(self, return_label=False):
+    def get_splits(self, return_label=False, filter_func=None):
         num_leaves = len(self.get_leaves())
         splits = set()
         for nid in self.get_all_nodes():
@@ -95,7 +95,7 @@ class BaseTree(object):
                 split = frozenset([node.name if return_label else node.identifier for node in self._nodes[nid].get_leaves()])
                 if len(split) < num_leaves-1:
                     splits.add(split)
-        return frozenset(splits)
+        return set(filter(filter_func, frozenset(splits)))
 
     def to_dict(self):
         # return a dict for the whole tree.
