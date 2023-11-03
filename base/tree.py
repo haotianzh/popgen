@@ -42,7 +42,8 @@ class BaseTree(object):
         return len(self._nodes)
     
     def __eq__(self, tree):
-        return tree.get_splits(True) == self.get_splits(True)
+        anchor = tree[tree.get_leaves()[0]].name
+        return tree.get_splits(True, anchor) == self.get_splits(True, anchor)
 
     def __hash__(self):
         return hash(self.get_splits(True))

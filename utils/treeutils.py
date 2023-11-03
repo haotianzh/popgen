@@ -394,7 +394,7 @@ def spr_move(tree, move):
     return tree
 
 
-def get_random_binary_tree(n_leave, start_index=0):
+def get_random_binary_tree(n_leave, start_index=0, random_branch=True):
     # create a random binary tree given the number of leaves
     nodes = [BNode(identifier=i) for i in range(start_index, n_leave+start_index)]
     while len(nodes) > 1:
@@ -405,6 +405,9 @@ def get_random_binary_tree(n_leave, start_index=0):
         node = Node()
         node.add_child(nodes[i])
         node.add_child(nodes[j])
+        if random_branch:
+            nodes[i].branch = np.round(np.random.rand(), 4)
+            nodes[j].branch = np.round(np.random.rand(), 4)
         nodes[i].set_parent(node)
         nodes[j].set_parent(node)
         nodes.pop(max(i,j))

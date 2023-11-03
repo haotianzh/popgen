@@ -52,7 +52,7 @@ class Node(object):
         try:
             self._branch = float(value)
         except (ValueError, TypeError):
-            # branch may not be a number, now we can assign any object attaching on the branch
+            # branch may not be a number, now we can assign any object attached to the branch
             # to be efficiently used on phylogeny and mutation tree
             self._branch = value 
 
