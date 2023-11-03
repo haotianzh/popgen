@@ -48,6 +48,8 @@ class BaseTree(object):
     def __hash__(self):
         return hash(self.get_splits(True))
 
+    def __str__(self):
+        return self.output()
 
     def _update(self):
         if self.root is not None:
