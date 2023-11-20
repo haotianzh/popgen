@@ -114,6 +114,8 @@ class Node(object):
         return self._children
 
     def get_leaves(self):
+        if self.is_leaf():
+            return [self]
         leaves = []
         for node in self.get_descendants():
             if node.is_leaf():
