@@ -110,7 +110,7 @@ class BaseTree(object):
         pass
 
   
-    def output(self, output_format='newick_unsorted', branch_lengths=False):
+    def output(self, output_format='newick_sorted', branch_lengths=False):
         def _newick_unsorted(node, branch_lengths):
             if node.is_leaf():
                 return node.name
