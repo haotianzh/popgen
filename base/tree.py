@@ -109,19 +109,36 @@ class BaseTree(object):
         # return a dict for the whole tree.
         pass
 
-    def output(self, output_format='newick', branch_lengths=False):
-        def _newick(node, branch_lengths):
+  
+    def output(self, output_format='newick_unsorted', branch_lengths=False):
+        def _newick_unsorted(node, branch_lengths):
             if node.is_leaf():
                 return node.name
             fstr = '(' + ','.join(['{newick}:{branch}'
-                                  .format(newick=_newick(child, branch_lengths), branch=child.branch)
-                                   if branch_lengths else _newick(child, branch_lengths)
+                                  .format(newick=_newick_unsorted(child, branch_lengths), branch=child.branch)
+                                   if branch_lengths else _newick_unsorted(child, branch_lengths)
                                    for child in node.get_children()]) + ')'
             return fstr
 
+        def _newick_sorted(node, branch_lengths):
+            if node.is_leaf():
+                return node.name
+            newick_children = []
+            for child in node.get_children():
+                if branch_lengths:
+                    newick_children.append('{newick}:{branch}'.format(newick=_newick_sorted(child, branch_lengths), branch=child.branch))
+                else:
+                    newick_children.append(_newick_sorted(child, branch_lengths))
+            fstr = '(' + ','.join(sorted(newick_children)) + ')'
+            return fstr
+        
         def newick():
-            return _newick(self.root, branch_lengths) + ';'
-        funcs = {'newick': newick}
+            return _newick_unsorted(self.root, branch_lengths) + ';'
+        
+        def newick_sorted():
+            return _newick_sorted(self.root, branch_lengths) + ';'
+
+        funcs = {'newick': newick, 'newick_sorted': newick_sorted}
         return funcs[output_format]()
 
     def draw(self):
