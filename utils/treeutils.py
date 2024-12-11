@@ -329,63 +329,113 @@ def build_perfect_phylogeny(mat):
     phylogeny = from_node(root)
     return phylogeny
 
-
 def single_spr_move(tree):
     """
         Note: only for binary tree
         a spr move is to randomly select a node and swap its parent with another node
         the parent node should not be the root and the other node cannot be its descendant
         return a new tree
+
+        1. allow the subtree directly under the root
     """
-    tree = tree.copy()
-    nodes = list(tree.get_all_nodes()) # identifiers
     
     while True:
+        tree = tree.copy()
+        nodes = list(tree.get_all_nodes()) # identifiers
         node = tree[random.choice(nodes)]
         parent = node.parent
         if node.is_root():
             continue
-        if parent.is_root():
+        sibling = node.get_siblings()[0]
+        if not parent.is_root():
+            grandparent = parent.parent
+            grandparent.remove_child(parent)
+            parent.set_parent(None)
+            parent.remove_child(sibling)
+            sibling.set_parent(None)
+            grandparent.add_child(sibling)
+            sibling.set_parent(grandparent)
+        else:
+            parent.remove_child(sibling)
+            sibling.set_parent(None)
+            tree = BaseTree(sibling)
+        tree._update()
+        candidates = list(tree.get_all_nodes().values())
+        if len(candidates) == 1:
             continue
-        # get all nodes that are not descendants of node
-        candidates = []
-        for idx in nodes:
-            n = tree[idx]
-            if n not in node.get_descendants() and n != node:
-                candidates.append(n)
-        if not candidates:
-            continue
-                
-        new_sibling = random.choice(candidates)
-        if new_sibling.is_root():
-            continue
-        if new_sibling == parent:
-            continue
-        # swap
-        # print('node', node.identifier)
-        # print('sib', new_sibling.identifier)  
-        grandparent = parent.parent
-        parent.remove_child(node)
-        node.set_parent(None)
-        sibling = parent.get_children()[0]
-        grandparent.remove_child(parent)
-        parent.set_parent(None)
-        parent.remove_child(sibling)
-        grandparent.add_child(sibling)
-        sibling.set_parent(grandparent)
-        sibling_parent = new_sibling.parent
-        sibling_parent.remove_child(new_sibling)
-        new_sibling.set_parent(None)
-        parent.add_child(new_sibling)
-        parent.add_child(node)
-        node.set_parent(parent)
-        new_sibling.set_parent(parent)
-        sibling_parent.add_child(parent)
-        parent.set_parent(sibling_parent)
         break
-
+    print('spr remove: ', node.identifier)
+    while True:
+        new_sibling = random.choice(candidates)
+        if new_sibling == sibling:
+            continue
+        print('spr regraft: ', new_sibling.identifier)
+        if new_sibling.is_root():
+            parent.add_child(new_sibling)
+            new_sibling.set_parent(parent)
+            tree = BaseTree(parent)
+        else:
+            parent.add_child(new_sibling)
+            new_sibling.parent.remove_child(new_sibling)
+            new_sibling.parent.add_child(parent)
+            parent.set_parent(new_sibling.parent)
+            new_sibling.set_parent(parent)        
+        break
     tree._update()
     return tree
+
+# def single_spr_move(tree):
+#     """
+#         Note: only for binary tree
+#         a spr move is to randomly select a node and swap its parent with another node
+#         the parent node should not be the root and the other node cannot be its descendant
+#         return a new tree
+#     """
+#     tree = tree.copy()
+#     nodes = list(tree.get_all_nodes()) # identifiers
+    
+#     while True:
+#         node = tree[random.choice(nodes)]
+#         parent = node.parent
+#         if node.is_root():
+#             continue
+#         if parent.is_root():
+#             continue
+#         # get all nodes that are not descendants of node
+#         candidates = []
+#         for idx in nodes:
+#             n = tree[idx]
+#             if n not in node.get_descendants() and n != node:
+#                 candidates.append(n)
+#         if not candidates:
+#             continue
+                
+#         new_sibling = random.choice(candidates)
+#         if new_sibling.is_root():
+#             continue
+#         if new_sibling == parent:
+#             continue
+#         # swap
+#         # print('node', node.identifier)
+#         # print('sib', new_sibling.identifier)  
+#         grandparent = parent.parent
+#         sibling = parent.get_children()[0]
+#         grandparent.remove_child(parent)
+#         parent.set_parent(None)
+#         parent.remove_child(sibling)
+#         grandparent.add_child(sibling)
+#         sibling.set_parent(grandparent)
+#         sibling_parent = new_sibling.parent
+#         sibling_parent.remove_child(new_sibling)
+#         new_sibling.set_parent(None)
+#         parent.add_child(new_sibling)
+#         new_sibling.set_parent(parent)
+#         sibling_parent.add_child(parent)
+#         parent.set_parent(sibling_parent)
+#         break
+
+#     tree._update()
+#     return tree
 
 
 def spr_move(tree, move):

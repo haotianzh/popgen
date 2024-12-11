@@ -81,6 +81,15 @@ class Node(object):
                 queue.append(child)
         return descendants
 
+    def get_siblings(self):
+        if not self.parent:
+            return None
+        siblings = []
+        for sib in self.parent.get_children():
+            if sib.identifier != self.identifier:
+                siblings.append(sib)
+        return siblings
+
     def get_descendants(self):
         # simple bfs for searching descendants
         descendants = []
