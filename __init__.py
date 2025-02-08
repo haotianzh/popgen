@@ -2,7 +2,7 @@
 
 Author: Haotian Z
 
-POPGEN is a library for research on Population Genetics.
+POPGEN is a library for research in Population Genetics.
 Specifically, for computational ops on tree structures.
 
 """

@@ -335,7 +335,7 @@ def load_pickle_file(file):
 
 def save(obj, path):
         with open(path, 'wb') as out:
-            pickle.dump(obj, out, protocol=4)
+            pickle.dump(obj, out, protocol=5)
 
 
 def get_datetime():

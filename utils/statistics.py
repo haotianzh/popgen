@@ -231,20 +231,3 @@ def _calculate_average_ne(times, sizes):
     for i in range(1, len(times)):
         weighted_sum += (times[i] - times[i-1]) / sizes[i]
     return (times[-1]-times[0]) / weighted_sum
-
-
-def spr_distance_cpp(newick1, newick2, spr_exec_path='/home/haz19024/softwares/rspr/rspr'):
-    """
-    Computes the SPR distance between two vectors.
-    """
-    assert os.path.exists(spr_exec_path), "rSPR binary file not found."
-    a = sp.run([spr_exec_path, "-bb", "-q"], input=f'{newick1}\n{newick2}'.encode(),
-               stdout=sp.PIPE)
-    result = a.stdout.decode().split('\n')[-2].split('=')[1]
-    return float(result) 
-
-
-def spr_distance(tree1, tree2):
-    newick1 = str(tree1)
-    newick2 = str(tree2)
-    return spr_distance_cpp(newick1, newick2)

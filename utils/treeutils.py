@@ -444,6 +444,24 @@ def spr_move(tree, move):
     return tree
 
 
+def spr_distance_cpp(newick1, newick2, upper_bound=None, spr_exec_path='/home/haz19024/softwares/rspr/rspr'):
+    """
+    Computes the SPR distance between two vectors.
+    """
+    assert os.path.exists(spr_exec_path), "rSPR binary file not found."
+    if not upper_bound:
+        a = sp.run([spr_exec_path, "-bb", "-q"], input=f'{newick1}\n{newick2}'.encode(), stdout=sp.PIPE)
+    else:
+        a = sp.run([spr_exec_path, "-bb", "-q", "-split-approx", str(upper_bound)], input=f'{newick1}\n{newick2}'.encode(), stdout=sp.PIPE)
+    result = a.stdout.decode().split('\n')[-2].split('=')[1]
+    return float(result) 
+
+
+def spr_distance(tree1, tree2):    
+    newick1 = str(tree1)
+    newick2 = str(tree2)
+    return spr_distance_cpp(newick1, newick2)
+
 def get_random_binary_tree(n_leave, start_index=0, random_branch=True):
     # create a random binary tree given the number of leaves
     nodes = [BNode(identifier=i) for i in range(start_index, n_leave+start_index)]
@@ -466,3 +484,11 @@ def get_random_binary_tree(n_leave, start_index=0, random_branch=True):
     root = nodes.pop()
     tree = from_node(root)
     return tree
+
+
+def build_no_repeat_clade(g):
+    clades = set()
+
+
+def mutated_clade_dist(g1, g2):
+    pass

@@ -16,6 +16,7 @@ if not jpype.isJVMStarted():
 
 from .javautils import *
 
+from .scistree import ScisTree2
 
 
 
