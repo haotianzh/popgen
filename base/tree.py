@@ -141,8 +141,8 @@ class BaseTree(object):
         funcs = {'newick': newick, 'newick_sorted': newick_sorted}
         return funcs[output_format]()
 
-    def draw(self):
-        pptree.print_tree(self.root, "_children", horizontal=False)
+    def draw(self, **kwargs):
+        pptree.print_tree(self.root, "_children", horizontal=False, **kwargs)
 
     def copy(self):
         return deepcopy(self)
