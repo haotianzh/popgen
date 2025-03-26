@@ -142,7 +142,7 @@ class BaseTree(object):
         return funcs[output_format]()
 
     def draw(self, **kwargs):
-        pptree.print_tree(self.root, "_children", horizontal=False, **kwargs)
+        pptree.print_tree(self.root, "_children", **kwargs)
 
     def copy(self):
         return deepcopy(self)
