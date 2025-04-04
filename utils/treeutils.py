@@ -27,24 +27,44 @@ class TraversalGenerator(object):
         self.order = order
         self.iterator = None
 
-    def __call__(self, tree):
+    def __call__(self, tree, order):
         # calling function
-        self.tree = tree
-        self.iterator = iter(self._method())
-        return self.iterator
+        valid_methods = {'pre': self._pre, 'in': self._in, 'post': self._post}
+        assert order in valid_methods, "order should be in ['pre', 'mid', 'post']"
+        method = valid_methods[order]
+        iterator = iter(method(tree))
+        return iterator
 
-    def _pre(self):
+    def _pre(self, tree):
         # pre-order traverse
-        warnings.warn("no implementation currently")
+        node = tree.root
+        traverse_nodes = []
+        while len(traverse_nodes) != len(tree):
+            while not node.is_leaf():
+                if node.identifier not in traverse_nodes:
+                    traverse_nodes.append(node.identifier)
+                    yield node
+                flag = False
+                for child in node.get_children():
+                    if child.identifier not in traverse_nodes:
+                        flag = True
+                        node = child
+                        break
+                if not flag: node = node.parent
+            if node.identifier not in traverse_nodes:
+                traverse_nodes.append(node.identifier)
+                yield node
+            node = node.parent
+                
 
-    def _in(self):
+    def _in(self, tree):
         # mid-order traverse
         warnings.warn("no implementation currently")
 
-    def _post(self):
-        node = self.tree.root
+    def _post(self, tree):
+        node = tree.root
         traverse_nodes = []
-        while len(traverse_nodes) != len(self.tree):
+        while len(traverse_nodes) != len(tree):
             while node.get_children():
                 flag = True
                 for child in node.get_children():
