@@ -1,4 +1,5 @@
 # Here, we provide a Python interface for conveniently calling Scistree2.
+import os
 import multiprocessing as mp
 import uuid
 import numpy as np
@@ -18,7 +19,7 @@ Args:
     verbose: Show outputs.
 """
 class ScisTree2():
-    def __init__(self, bin_path='../libs/scistree',
+    def __init__(self, bin_path='/home/haz19024/projects/popgen/libs/scistree',
                  threads=-1, nj=False, spr=True, nni=False, iterative=False, verbose=True):
         self.nj = nj
         self.spr = spr
@@ -54,7 +55,7 @@ class ScisTree2():
                 out.write(f's{i}')
                 for j in range(ncell):
                     prob = genotype_matrix[i, j]
-                    out.write(f' {prob:.5f}')
+                    out.write(f' {prob:.10f}')
                 out.write('\n')
         return output
     
@@ -95,11 +96,14 @@ class ScisTree2():
             time = float(res[-1].split('=')[1].split('seconds')[0])
             nwk = res[-2].split(':')[1].strip() + ';'
             ml = float(res[-4].split(',')[0].split(':')[1])
-            imp_geno = self.get_scistree_genotype(output)
+            imp_geno = self.read_scistree_genotype(output)
+            os.remove(output)
+            os.remove(f'{output}.genos.imp')
             return imp_geno, nwk, ml, time
         else:
             time = float(res[-1].split('=')[1].split('seconds')[0])
             nwk = res[-2].split(':')[1].strip() + ';'
+            os.remove(output)
             return nwk, time
     
     """
@@ -118,7 +122,7 @@ class ScisTree2():
         assert isinstance(nwk, str), 'tree should be a newick string.'
         tree = popgen.utils.relabel(popgen.utils.from_newick(nwk), offset=offset)
         traveror = popgen.utils.TraversalGenerator(order='post')
-        max_mls = np.zeros(geno.shape[0]) - np.inf 
+        max_mls = np.zeros(geno.shape[0]) # - np.inf 
         max_ml_nodes = [None] * geno.shape[0]
         g = np.log(1-geno) - np.log(geno) # in log space to avoid numerical overflow
         for node in traveror(tree):
@@ -131,14 +135,16 @@ class ScisTree2():
                     max_mls[i] = l
                     max_ml_nodes[i] = node
             node.likelihood = likelihood
-        # print(max_ml_nodes)
+            # print(likelihood)
         max_mls += np.log(geno).sum(axis=1)
         imputed_genotype = np.zeros_like(geno, dtype=int)
         # print(imputed_genotype.sum(axis=-1))
         for i, ml_node in enumerate(max_ml_nodes):
-            inds = [int(leaf.name) for leaf in ml_node.get_leaves()]
-            imputed_genotype[i, inds] = 1
-        return imputed_genotype, sum(max_mls)
+            if ml_node:
+                inds = [int(leaf.name) for leaf in ml_node.get_leaves()]
+                imputed_genotype[i, inds] = 1
+        print('zeros', (max_mls == -np.inf).sum())
+        return imputed_genotype, sum(max_mls[max_mls != -np.inf])
     
     @staticmethod
     def evaluate_cupy(geno, nwk, offset=-1):

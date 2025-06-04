@@ -27,7 +27,7 @@ class TraversalGenerator(object):
         self.order = order
         self.iterator = None
 
-    def __call__(self, tree, order):
+    def __call__(self, tree, order='post'):
         # calling function
         valid_methods = {'pre': self._pre, 'in': self._in, 'post': self._post}
         assert order in valid_methods, "order should be in ['pre', 'mid', 'post']"
@@ -193,6 +193,8 @@ def relabel(tree, offset=0, name_map=None):
     elif offset != 0:
         for leaf in tree.get_leaves():
             tree[leaf].name = str(int(tree[leaf].name)+offset)
+    elif offset == 0 and name_map == None:
+        pass
     else:
         for leaf in tree.get_leaves():
             name = tree[leaf].name
@@ -350,7 +352,7 @@ def build_perfect_phylogeny(mat):
     phylogeny = from_node(root)
     return phylogeny
 
-def single_spr_move(tree):
+def single_spr_move(tree, verbose=False):
     """
         Note: only for binary tree
         a spr move is to randomly select a node and swap its parent with another node
@@ -385,12 +387,14 @@ def single_spr_move(tree):
         if len(candidates) == 1:
             continue
         break
-    print('spr remove: ', node.identifier)
+    if verbose:
+        print('spr remove: ', node.identifier)
     while True:
         new_sibling = random.choice(candidates)
         if new_sibling == sibling:
             continue
-        print('spr regraft: ', new_sibling.identifier)
+        if verbose:
+            print('spr regraft: ', new_sibling.identifier)
         if new_sibling.is_root():
             parent.add_child(new_sibling)
             new_sibling.set_parent(parent)
